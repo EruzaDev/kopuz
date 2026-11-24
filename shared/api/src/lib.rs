@@ -207,6 +207,9 @@ pub trait PlayerApi: Send + Sync {
 
     /// Play what a "Listen on Kopuz" link carries, on its own source; the outcome is also a notice, for the window that is open.
     async fn open_listen_link(&self, link: String) -> Result<(), ApiError>;
+
+    /// Play local audio files directly from disk, replacing the current queue.
+    async fn open_local_files(&self, paths: Vec<String>) -> Result<(), ApiError>;
 }
 
 /// Reading the library, and the per-track state that belongs to it.

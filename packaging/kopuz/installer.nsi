@@ -501,10 +501,17 @@ Section Install
     File /a "/oname={{this}}" "{{@key}}"
   {{/each}}
 
-  ; Create file associations
+  ; Create file associations and register capabilities for Windows Default Apps and "Open with"
+  {{#if file_associations}}
+  WriteRegStr SHCTX "${MANUPRODUCTKEY}\Capabilities" "ApplicationName" "${PRODUCTNAME}"
+  WriteRegStr SHCTX "${MANUPRODUCTKEY}\Capabilities" "ApplicationDescription" "${SHORTDESCRIPTION}"
+  WriteRegStr SHCTX "Software\RegisteredApplications" "${PRODUCTNAME}" "${MANUPRODUCTKEY}\Capabilities"
+  {{/if}}
   {{#each file_associations as |association| ~}}
     {{#each association.extensions as |ext| ~}}
        !insertmacro APP_ASSOCIATE "{{ext}}" "{{or association.name ext}}" "{{association-description association.description ext}}" "$INSTDIR\${MAINBINARYNAME}.exe,0" "Open with ${PRODUCTNAME}" "$INSTDIR\${MAINBINARYNAME}.exe $\"%1$\""
+       WriteRegStr SHCTX "${MANUPRODUCTKEY}\Capabilities\FileAssociations" ".{{ext}}" "{{or association.name ext}}"
+       WriteRegStr SHCTX "Software\Classes\.{{ext}}\OpenWithProgids" "{{or association.name ext}}" ""
     {{/each}}
   {{/each}}
 
@@ -602,8 +609,13 @@ Section Uninstall
   {{/each}}
 
   ; Delete app associations
+  {{#if file_associations}}
+  DeleteRegValue SHCTX "Software\RegisteredApplications" "${PRODUCTNAME}"
+  DeleteRegKey SHCTX "${MANUPRODUCTKEY}\Capabilities"
+  {{/if}}
   {{#each file_associations as |association| ~}}
-    {{#each association.ext as |ext| ~}}
+    {{#each association.extensions as |ext| ~}}
+      DeleteRegValue SHCTX "Software\Classes\.{{ext}}\OpenWithProgids" "{{or association.name ext}}"
       !insertmacro APP_UNASSOCIATE "{{ext}}" "{{or association.name ext}}"
     {{/each}}
   {{/each}}

@@ -36,6 +36,10 @@ contents:
   - src: LICENSE
     dst: /usr/share/licenses/kopuz-nightly/LICENSE
 
+scripts:
+  postinstall: packaging/linux/update-desktop-db.sh
+  postremove: packaging/linux/update-desktop-db.sh
+
 # kopuz links xcb/xkbcommon and dlopens wayland, vulkan and fontconfig; kopuzd links ALSA and OpenSSL and won't start without CA certs.
 overrides:
   deb:

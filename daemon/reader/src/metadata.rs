@@ -272,11 +272,10 @@ pub fn read_metadata(track_path: &Path) -> Option<ScannedTrack> {
     let options = ParseOptions::new().read_cover_art(false);
     let tagged_file = match Probe::open(track_path).ok()?.options(options).read() {
         Ok(tagged_file) => tagged_file,
-        Err(_) if is_matroska_audio(track_path) => {
+        Err(_) => {
             let file = std::fs::File::open(track_path).ok()?;
             return read_with_symphonia(Box::new(file), track_path).ok();
         }
-        Err(_) => return None,
     };
     let file_size = std::fs::metadata(track_path)
         .map(|metadata| metadata.len())
@@ -411,13 +410,6 @@ pub fn write_tags(track_path: &Path, edits: &TrackEdits) -> Result<(), String> {
     tagged
         .save_to_path(track_path, WriteOptions::default())
         .map_err(|e| e.to_string())
-}
-
-fn is_matroska_audio(track_path: &Path) -> bool {
-    track_path
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .is_some_and(|ext| ext.eq_ignore_ascii_case("mka"))
 }
 
 fn symphonia_tag_to_string(tag: &SymphoniaTag) -> Option<String> {

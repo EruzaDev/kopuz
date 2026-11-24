@@ -524,6 +524,38 @@ impl api::PlayerApi for LocalApi {
         });
         played.map_err(|refusal| refusal.error)
     }
+
+    async fn open_local_files(&self, paths: Vec<String>) -> Result<(), ApiError> {
+        self.acted();
+        let tracks = tokio::task::spawn_blocking(move || {
+            let mut resolved = Vec::with_capacity(paths.len());
+            for raw in paths {
+                let path = std::path::PathBuf::from(&raw);
+                let path = std::fs::canonicalize(&path).unwrap_or(path);
+                if !path.is_file() {
+                    continue;
+                }
+                let Some(mut scanned) = reader::metadata::read_metadata(&path) else {
+                    tracing::warn!(path = %path.display(), "skipping unreadable audio file");
+                    continue;
+                };
+                if scanned.track.cover.is_none()
+                    && let Some(cover) = path.parent().and_then(reader::utils::find_folder_cover)
+                {
+                    scanned.track.cover = Some(cover.to_string_lossy().into_owned());
+                }
+                resolved.push(scanned.track);
+            }
+            resolved
+        })
+        .await
+        .map_err(|error| ApiError::internal(format!("reading local audio files: {error}")))?;
+        if tracks.is_empty() {
+            return Err(ApiError::invalid_input("no playable audio files"));
+        }
+        self.session.play_tracks(tracks).await?;
+        Ok(())
+    }
 }
 
 #[async_trait::async_trait]

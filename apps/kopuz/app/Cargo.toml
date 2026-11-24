@@ -27,6 +27,19 @@ license-file = "../../../LICENSE"
 icons = ["../../legacy/kopuz/assets/logo.png", "../../legacy/kopuz/assets/app.ico"]
 # Where "Listen on Kopuz" links land: the website hands the Discord button to kopuz://j/.
 deep-link-protocols = [{ schemes = ["kopuz"] }]
+file-associations = [
+  { ext = ["flac"], name = "FLAC Audio", description = "FLAC Audio File", mime-type = "audio/flac", role = "Viewer" },
+  { ext = ["mp3", "mp2", "mp1"], name = "MP3 Audio", description = "MPEG Audio File", mime-type = "audio/mpeg", role = "Viewer" },
+  { ext = ["wav", "wave"], name = "WAV Audio", description = "WAV Audio File", mime-type = "audio/wav", role = "Viewer" },
+  { ext = ["ogg", "oga"], name = "Ogg Audio", description = "Ogg Audio File", mime-type = "audio/ogg", role = "Viewer" },
+  { ext = ["opus"], name = "Opus Audio", description = "Opus Audio File", mime-type = "audio/opus", role = "Viewer" },
+  { ext = ["m4a", "m4b"], name = "M4A Audio", description = "MPEG-4 Audio File", mime-type = "audio/mp4", role = "Viewer" },
+  { ext = ["aac"], name = "AAC Audio", description = "AAC Audio File", mime-type = "audio/aac", role = "Viewer" },
+  { ext = ["aiff", "aif", "aifc"], name = "AIFF Audio", description = "AIFF Audio File", mime-type = "audio/aiff", role = "Viewer" },
+  { ext = ["mka"], name = "Matroska Audio", description = "Matroska Audio File", mime-type = "audio/x-matroska", role = "Viewer" },
+  { ext = ["weba"], name = "WebM Audio", description = "WebM Audio File", mime-type = "audio/webm", role = "Viewer" },
+  { ext = ["caf"], name = "Core Audio", description = "Core Audio File", mime-type = "audio/x-caf", role = "Viewer" },
+]
 # The app spawns kopuzd from its own directory, so both land side by side in every format.
 binaries = [
   { path = "kopuz", main = true },
@@ -61,6 +74,7 @@ tracing-subscriber = { workspace = true }
 anyhow = { workspace = true }
 futures = { workspace = true }
 image = { workspace = true }
+url = { workspace = true }
 
 library = { path = "../library" }
 discover = { path = "../discover" }

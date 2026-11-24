@@ -294,6 +294,14 @@ impl api::PlayerApi for GrpcApi {
         Ok(())
     }
 
+    async fn open_local_files(&self, paths: Vec<String>) -> Result<(), ApiError> {
+        self.client()
+            .open_local_files(Request::new(proto::OpenLocalFilesRequest { paths }))
+            .await
+            .map_err(wire_error)?;
+        Ok(())
+    }
+
     async fn video(&self, request: api::VideoRequest) -> Result<api::VideoChunk, ApiError> {
         let chunk = self
             .client()

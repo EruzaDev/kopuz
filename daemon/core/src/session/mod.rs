@@ -221,6 +221,7 @@ enum SessionCmd {
         SetQueueRequest,
         oneshot::Sender<Result<CommandAck, ApiError>>,
     ),
+    PlayTracks(Vec<Track>, oneshot::Sender<Result<CommandAck, ApiError>>),
     Window(Page, oneshot::Sender<Result<QueueWindow, ApiError>>),
     RestoreQueue(
         Box<db::QueueSnapshot>,
@@ -479,6 +480,10 @@ impl SessionHandle {
 
     pub async fn set_queue(&self, request: SetQueueRequest) -> Result<CommandAck, ApiError> {
         self.request(|tx| SessionCmd::SetQueue(request, tx)).await
+    }
+
+    pub async fn play_tracks(&self, tracks: Vec<Track>) -> Result<CommandAck, ApiError> {
+        self.request(|tx| SessionCmd::PlayTracks(tracks, tx)).await
     }
 
     pub async fn queue_window(&self, page: Page) -> Result<QueueWindow, ApiError> {
@@ -885,6 +890,10 @@ impl Session {
             }
             SessionCmd::SetQueue(request, reply) => {
                 let result = self.handle_set_queue(request, state_tx).await;
+                let _ = reply.send(result);
+            }
+            SessionCmd::PlayTracks(tracks, reply) => {
+                let result = self.handle_play_tracks(tracks, state_tx);
                 let _ = reply.send(result);
             }
             SessionCmd::Window(page, reply) => {
@@ -1437,6 +1446,25 @@ impl Session {
         if request.mode != QueueMode::Replace && was_empty && !self.model.is_empty() {
             self.origin = origin;
         }
+        Ok(self.publish(state_tx, true))
+    }
+
+    fn handle_play_tracks(
+        &mut self,
+        tracks: Vec<Track>,
+        state_tx: &watch::Sender<PlayerState>,
+    ) -> Result<CommandAck, ApiError> {
+        let mut candidate = self.model.clone();
+        candidate.replace(tracks);
+        if candidate.is_empty() {
+            self.model = candidate;
+            self.stop_playback();
+        } else {
+            let idx = candidate.jump_to(0);
+            self.start_immediate_load(candidate, idx)?;
+        }
+        self.set_radio_feed(None);
+        self.origin = None;
         Ok(self.publish(state_tx, true))
     }
 
