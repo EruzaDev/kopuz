@@ -1156,6 +1156,18 @@ impl Kopuz for KopuzGrpc {
         Ok(Response::new(proto::Unit {}))
     }
 
+    async fn open_local_files(
+        &self,
+        request: Request<proto::OpenLocalFilesRequest>,
+    ) -> Result<Response<proto::Unit>, Status> {
+        self.0
+            .api
+            .open_local_files(request.into_inner().paths)
+            .await
+            .map_err(failed)?;
+        Ok(Response::new(proto::Unit {}))
+    }
+
     async fn select_external_device(
         &self,
         request: Request<proto::SelectExternalDeviceRequest>,

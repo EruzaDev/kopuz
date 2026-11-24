@@ -73,6 +73,16 @@ pub fn hand_off(address: &link::Address, url: String) {
     }
 }
 
+/// Give local audio `paths` to the daemon the open window is attached to.
+pub fn hand_off_files(address: &link::Address, paths: Vec<String>) {
+    match link::call_once(address, HAND_OFF_PATIENCE, |api| async move {
+        api.open_local_files(paths).await
+    }) {
+        Ok(()) => tracing::info!("handed audio files to the open window's daemon"),
+        Err(error) => tracing::warn!(%error, "could not hand audio files over"),
+    }
+}
+
 /// Give `url` to the daemon once this window's link to it is up.
 pub fn open(url: String, cx: &mut App) {
     let connection = link::Link::connection(cx);
@@ -90,6 +100,26 @@ pub fn open(url: String, cx: &mut App) {
     .detach();
 }
 
+/// Give local audio `paths` to the daemon once this window's link to it is up.
+pub fn open_files(paths: Vec<String>, cx: &mut App) {
+    if paths.is_empty() {
+        return;
+    }
+    let connection = link::Link::connection(cx);
+    if connection.read(cx).is_connected() {
+        return send_files(paths, cx);
+    }
+    let mut pending = Some(paths);
+    cx.observe(&connection, move |connection, cx| {
+        if connection.read(cx).is_connected()
+            && let Some(paths) = pending.take()
+        {
+            send_files(paths, cx);
+        }
+    })
+    .detach();
+}
+
 /// The daemon announces how it went, so only a call that never reached it is worth a line in the log.
 fn send(url: String, cx: &mut App) {
     let call =
@@ -97,6 +127,17 @@ fn send(url: String, cx: &mut App) {
     cx.spawn(async move |_| {
         if let Err(error) = call.await {
             tracing::warn!(%error, "the daemon did not play the link");
+        }
+    })
+    .detach();
+}
+
+fn send_files(paths: Vec<String>, cx: &mut App) {
+    let call =
+        link::Link::global(cx).call(move |api| async move { api.open_local_files(paths).await });
+    cx.spawn(async move |_| {
+        if let Err(error) = call.await {
+            tracing::warn!(%error, "the daemon did not play the opened files");
         }
     })
     .detach();

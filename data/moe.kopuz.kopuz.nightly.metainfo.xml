@@ -37,4 +37,26 @@
     <keyword>spotify</keyword>
   </keywords>
   <content_rating type="oars-1.1"/>
+  <provides>
+    <binary>kopuz-nightly</binary>
+    <mediatype>audio/aac</mediatype>
+    <mediatype>audio/aiff</mediatype>
+    <mediatype>audio/flac</mediatype>
+    <mediatype>audio/m4a</mediatype>
+    <mediatype>audio/mp2</mediatype>
+    <mediatype>audio/mp3</mediatype>
+    <mediatype>audio/mp4</mediatype>
+    <mediatype>audio/mpeg</mediatype>
+    <mediatype>audio/ogg</mediatype>
+    <mediatype>audio/opus</mediatype>
+    <mediatype>audio/vorbis</mediatype>
+    <mediatype>audio/wav</mediatype>
+    <mediatype>audio/webm</mediatype>
+    <mediatype>audio/x-caf</mediatype>
+    <mediatype>audio/x-flac</mediatype>
+    <mediatype>audio/x-m4a</mediatype>
+    <mediatype>audio/x-matroska</mediatype>
+    <mediatype>audio/x-wav</mediatype>
+    <mediatype>application/ogg</mediatype>
+  </provides>
 </component>

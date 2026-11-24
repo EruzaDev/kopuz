@@ -98,6 +98,7 @@ service Kopuz {
   rpc GetOutputDevices(GetOutputDevicesRequest) returns (OutputDeviceList);
   rpc SelectExternalDevice(SelectExternalDeviceRequest) returns (Unit);
   rpc OpenListenLink(OpenListenLinkRequest) returns (Unit);
+  rpc OpenLocalFiles(OpenLocalFilesRequest) returns (Unit);
   rpc SetFavorite(FavoriteRequest) returns (SetFavoriteResponse);
   rpc DontRecommend(DontRecommendRequest) returns (Unit);
   rpc Rate(RateRequest) returns (Unit);
@@ -503,6 +504,10 @@ message OutputDeviceList {
 // Absent device_id moves playback back to this app's own player.
 message OpenListenLinkRequest {
   string link = 1;
+}
+
+message OpenLocalFilesRequest {
+  repeated string paths = 1;
 }
 
 message SelectExternalDeviceRequest {

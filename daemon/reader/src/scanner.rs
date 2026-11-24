@@ -496,7 +496,10 @@ async fn collect_audio_files(root: &Path) -> (Vec<PathBuf>, Vec<(PathBuf, PathBu
 }
 
 pub fn is_audio_file(path: &Path) -> bool {
-    let extensions = ["mp3", "flac", "m4a", "wav", "ogg", "opus", "mp4", "mka"];
+    let extensions = [
+        "mp3", "mp2", "mp1", "flac", "m4a", "m4b", "aac", "wav", "wave", "aif", "aiff", "aifc",
+        "ogg", "oga", "opus", "caf", "mp4", "mka", "weba",
+    ];
     path.extension()
         .and_then(|s| s.to_str())
         .is_some_and(|s| extensions.iter().any(|e| s.eq_ignore_ascii_case(e)))
